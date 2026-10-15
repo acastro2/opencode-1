@@ -3,6 +3,12 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { waitForExit } from "./service-timing"
 
+// Windows has no catchable SIGTERM: process.kill ends the target at once with exit code 1, so the
+// service's SIGTERM handler (record the signal, unregister a lingering server, exit 0) runs only on POSIX.
+export const catchesSigterm = process.platform !== "win32"
+export const stopSignal = catchesSigterm ? "SIGTERM" : undefined
+export const stoppedExitCode = catchesSigterm ? 0 : 1
+
 export async function serviceFixture() {
   const directory = await mkdtemp(join(tmpdir(), "opencode-client-service-"))
   const registration = join(directory, "service.json")
@@ -63,6 +69,12 @@ export async function serviceFixture() {
     // Service.ensure detaches contenders; track the elected process before asserting.
     track(pid: number) {
       pids.add(pid)
+    },
+    // The signal the service recorded while shutting down, if its handler ran.
+    signal() {
+      return Bun.file(registration + ".signal")
+        .text()
+        .catch(() => undefined)
     },
     async waitForFile(file = registration) {
       for (let attempt = 0; attempt < 600; attempt++) {
