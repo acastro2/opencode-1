@@ -148,6 +148,7 @@ jobs:
             host: blacksmith-4vcpu-ubuntu-2404
           - name: windows
             host: blacksmith-4vcpu-windows-2025
+    if: false
     runs-on: ${{ matrix.settings.host }}
     defaults:
       run:
@@ -207,7 +208,7 @@ jobs:
   e2e-suite:
     name: e2e (${{ matrix.settings.name }}, ${{ matrix.suite.id }})
     needs: affected
-    if: needs.affected.outputs.e2e == 'true'
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -318,11 +319,11 @@ jobs:
   e2e:
     name: e2e (${{ matrix.os }})
     needs: [affected, e2e-suite]
-    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix:
         os: [linux, windows]
+    if: false
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Check browser test results

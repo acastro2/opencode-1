@@ -36,7 +36,7 @@ const environment = {
 
 const child = Bun.spawn({
   // The 30s default timeout matches cli and tui; npm.test's Git package installs ran past Bun's 5s default on Windows.
-  cmd: [process.execPath, "test", "--only-failures", "--timeout=30000", ...process.argv.slice(2)],
+  cmd: [process.execPath, "test", "--only-failures", "--timeout=30000", "--parallel=2", "--no-isolate", ...process.argv.slice(2)],
   env: environment,
   stdin: "inherit",
   stdout: "inherit",
